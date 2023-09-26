@@ -97,7 +97,7 @@ def import_impl(ctx: click.core.Context, zpath: str, zaddress: str, src_dir: str
             try:
                 zk.set(f"{zpath}/{znode}", data)
             except kazoo.exceptions.NoNodeError:
-                zk.create(f"{zpath}/{znode}", data)
+                zk.create(f"{zpath}/{znode}", data, makepath=True)
     finally:
         zk.stop()
 
