@@ -88,10 +88,10 @@ def import_impl(ctx: click.core.Context, zpath: str, zaddress: str, src_dir: str
 
     try:
         for zdata_file in find_zdata_files(src_dir):
-            znode = zdata_file[:-len(zdata) - 1]
+            znode = zdata_file[len(src_dir)+1:-len(zdata) - 1]
 
             if ctx.obj['verbose']:
-                print(f"Importing {znode}")
+                print(f"Importing {zpath}/{znode}")
 
             data = open(zdata_file, "rb").read()
             try:
