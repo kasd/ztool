@@ -5,6 +5,7 @@
 
 import os
 import click
+import kazoo
 from kazoo.client import KazooClient
 
 
@@ -87,11 +88,16 @@ def import_impl(ctx: click.core.Context, zpath: str, zaddress: str, src_dir: str
 
     try:
         for zdata_file in find_zdata_files(src_dir):
+            znode = zdata_file[:-len(zdata) - 1]
+
             if ctx.obj['verbose']:
-                print(f"Importing {zdata_file}")
+                print(f"Importing {znode}")
 
             data = open(zdata_file, "rb").read()
-            zk.set(f"{zpath}/{zdata_file}", data)
+            try:
+                zk.set(f"{zpath}/{znode}", data)
+            except kazoo.exceptions.NoNodeError:
+                zk.create(f"{zpath}/{znode}", data)
     finally:
         zk.stop()
 
