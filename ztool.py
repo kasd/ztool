@@ -78,8 +78,9 @@ def import_impl(ctx: click.core.Context, zpath: str, zaddress: str, src_dir: str
                     for entry in entries:
                         if entry.is_dir():
                             stack.append(entry.path)
+                            yield False, entry.path
                         elif entry.is_file() and entry.name == zdata:
-                            yield entry.path
+                            yield True, entry.path
             except OSError as e:
                 print(f"Error while scanning {current_dir}: {e}")
 
@@ -87,17 +88,20 @@ def import_impl(ctx: click.core.Context, zpath: str, zaddress: str, src_dir: str
     zk.start()
 
     try:
-        for zdata_file in find_zdata_files(src_dir):
+        for is_data, zdata_file in find_zdata_files(src_dir):
             znode = zdata_file[len(src_dir)+1:-len(zdata) - 1]
 
             if ctx.obj['verbose']:
                 print(f"Importing {zpath}/{znode}")
 
-            data = open(zdata_file, "rb").read()
-            try:
-                zk.set(f"{zpath}/{znode}", data)
-            except kazoo.exceptions.NoNodeError:
-                zk.create(f"{zpath}/{znode}", data, makepath=True)
+            if is_data:
+                data = open(zdata_file, "rb").read()
+                try:
+                    zk.set(f"{zpath}/{znode}", data)
+                except kazoo.exceptions.NoNodeError:
+                    zk.create(f"{zpath}/{znode}", data, makepath=True)
+            else:
+                zk.create(f"{zpath}/{znode}", makepath=True)            
         
         print(f"ZooKeeper data imported from {src_dir}")
     finally:
