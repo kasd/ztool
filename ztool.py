@@ -89,7 +89,10 @@ def import_impl(ctx: click.core.Context, zpath: str, zaddress: str, src_dir: str
 
     try:
         for is_data, zdata_file in find_zdata_files(src_dir):
-            znode = zdata_file[len(src_dir)+1:-len(zdata) - 1]
+            if is_data:
+                znode = zdata_file[len(src_dir)+1:-len(zdata) - 1]
+            else:
+                znode = zdata_file[len(src_dir)+1:]
 
             if ctx.obj['verbose']:
                 print(f"Importing {zpath}/{znode}")
