@@ -101,7 +101,10 @@ def import_impl(ctx: click.core.Context, zpath: str, zaddress: str, src_dir: str
                 except kazoo.exceptions.NoNodeError:
                     zk.create(f"{zpath}/{znode}", data, makepath=True)
             else:
-                zk.create(f"{zpath}/{znode}", makepath=True)            
+                try:
+                    zk.create(f"{zpath}/{znode}", makepath=True)            
+                except kazoo.exceptions.NodeExistsError:
+                    pass
         
         print(f"ZooKeeper data imported from {src_dir}")
     finally:
